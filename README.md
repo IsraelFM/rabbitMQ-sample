@@ -18,5 +18,6 @@ Open another terminal and then:
 <br>
 
 ``node src/send.js``
-<br><br>and again, open another terminal and then:<br>
+<br><br>and again, open another terminal and then:
+<br><br>
 ``node src/receive.js``<br>
