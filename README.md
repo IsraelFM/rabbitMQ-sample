@@ -11,7 +11,8 @@ If you understand Portuguese, you can check out the video where I do a step by s
 
 Note: you need to have <a href='https://nodejs.org/en/'>NodeJs</a> and <a href='https://docs.docker.com/docker-for-windows/install/'>Docker</a> installed on your computer, if not, please follow the documentation.<br>
 
-First we need to raise our RabbitMQ server using our docker<br>
+First we need to raise our RabbitMQ server using our docker
+<br><br>
 ``docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management`` <br>
 
 Open another terminal and then:
