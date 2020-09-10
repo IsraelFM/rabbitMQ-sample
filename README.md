@@ -14,8 +14,9 @@ Note: you need to have <a href='https://nodejs.org/en/'>NodeJs</a> and <a href='
 First we need to raise our RabbitMQ server using our docker<br>
 ``docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management`` <br>
 
-Open another terminal and then:<br>
+Open another terminal and then:
+<br><br>
 
-``node src/send.js``<br>
-and again, open another terminal and then:<br>
+``node src/send.js``
+<br><br>and again, open another terminal and then:<br>
 ``node src/receive.js``<br>
