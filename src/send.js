@@ -1,27 +1,73 @@
+/**
+ *  carregando as dependencias necessárias para a aplicação
+ *  amqplib/callback_api é uma lib que irá nos dar uma api para estabelecermos
+ *  utilizarmos uma conexão com o protocolo AMQP.
+ *
+ *  getMessages é uma função que irá fazer 2 perguntas ao usuario para capturarmos
+ *  estes numeros e depois enviarmos para fila
+ *
+ *  NUMBERS é uma variável que receberá os numeros enviados pelo console
+ */
+
 const amqp = require('amqplib/callback_api')
 const { getMessages } = require('./helpers/askQuestions')
 let NUMBERS
 
-function connectToRabbit() {
+// apenas uma abstração da nossa conexão para ser usada mais abaixo
+function connectToRabbit () {
+  /**
+   *  inicializando a conexão, aqui dizemos a lib aonde vamos nos connectar,
+   *  neste caso ele irá pegar os valores padrões da conexão com a AMQP como
+   *  por exemplo 5672.
+   */
   amqp.connect('amqp://localhost', function (error0, connection) {
     if (error0) {
       throw error0
     }
-  
+
+    /**
+     *  Caso a conexão seja bem sucedida vamos iniciar nosso canal de comunicação
+     *  entre nossa aplicação e o servidor do rabbitMQ
+     */
     connection.createChannel(function (error1, channel) {
       if (error1) {
         throw error1
       }
-  
+
+      // Declarando que o nome da nossa fila é 'hello'
       const queue = 'hello'
-  
+
+      /**
+       *  Declarando qual será nossa mensagem a ser enviada para nossa fila
+       *  neste caso um buffer do nosso objeto NUMBERS que contem os 2 numeros
+       *  digitado pelo usuário
+       */
+
       const message = Buffer.from(JSON.stringify(NUMBERS).toString())
-  
+
+      /**
+       *  após darmos o start na nossa comunicação, vamos estabalecer nossa fila,
+       *  utilizando a api da amqplib assertQueue
+       */
       channel.assertQueue(queue, { durable: false })
-  
+
+      /**
+       *  Publisher.
+       *  neste momento iremos enviar efetivamente nossa mensagem para a fila, 
+       *  através da api sendToQueue, ela recebe dois parâmetros, o nome da fila
+       *  no nosso caso 'hello' e a nossa mensagem previamente declarada como 
+       *  um buffer
+       */
       channel.sendToQueue(queue, message)
+
+      // Serve apenas para nos mostrar o buffer que foi enviado.
       console.log('[X] Sent ', message)
     })
+    /**
+     *  Esta função serve apenas para que nossa aplicação espere alguns momentos 
+     *  antes de encerrar nossa conexão atraves do connection.close()
+     *  e o encerramento do nosso processo utilizando o proccess.exit(0)
+     */
     setTimeout(function () {
       connection.close()
       process.exit(0)
@@ -30,8 +76,11 @@ function connectToRabbit() {
 }
 
 async function handle () {
+  // Chamada da função que faz as perguntas para o usuário e coloca na variável NUMBERS
   NUMBERS = await getMessages()
+  // Chamada da nossa abstração da conexão com o rabbitMQ
   connectToRabbit()
 }
 
+// Utilizado para chamar nossas funções em conjunto.
 handle()
