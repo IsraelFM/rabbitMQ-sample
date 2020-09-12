@@ -17,7 +17,8 @@ First we need to raise our RabbitMQ server using our docker
 
 Open another terminal and then:
 <br>
-
+``npm i``
+<br>
 ``node src/send.js``
 <br><br>and again, open another terminal and then:
 <br><br>
