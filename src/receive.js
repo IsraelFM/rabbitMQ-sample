@@ -6,7 +6,6 @@
  *  ConsumeFunction, essa função fará o consumo dos dados da api, essa função pode
  *  ser e é 100% desacoplada da nossa fila, nessa função podemos realizar qualquer
  *  operação, neste exemplo estamos apenas fazendo alguns calculos com os dados fornecidos
- *  porém na vida real você poderá utilizar o que for de sua necessidade
  */
 const amqp = require('amqplib/callback_api')
 const { consumeFunction } = require('./helpers/consume')
@@ -30,30 +29,30 @@ amqp.connect('amqp://localhost', function (error0, connection) {
    *  entre nossa aplicação e o servidor do rabbitMQ
    */
   connection.createChannel(function (error1, channel) {
-    /**
-     *  Recebemos duas variáveis neste momento, um error1 que será nulo caso tudo
-     *  ocorra como esperado, e uma interface channel que representa nosso canal de 
-     *  comunicação api com o servidor do RabbitMQ
-     */
     if (error1) {
       throw error1
     }
+    /**
+     *  Recebemos duas variáveis neste momento, um error1 que será nulo caso tudo
+     *  ocorra como esperado, e uma interface channel que representa nosso canal de
+     *  comunicação api com o servidor do RabbitMQ
+     */
 
+    // Declarando o nome da nossa exchange
+    const exchange = 'direct_logs'
 
-    // Declarando que o nome da nossa fila é 'hello'
-    const queue = 'hello'
+    /**
+     *  após darmos o start na nossa comunicação, vamos estabalecer nossa exchange,
+     *  utilizando a api da amqplib assertExchange
+     */
+    channel.assertExchange(exchange, 'direct', {
+      durable: false
+    })
 
     /**
      *  após darmos o start na nossa comunicação, vamos estabalecer nossa fila,
      *  utilizando a api da amqplib assertQueue
      */
-    channel.assertQueue(queue, {
-      durable: false
-    })
-
-    // Apenas para dizermos que estamos escutando por mensagens a serem enviadas
-    console.log('[X] Waiting for messages.')
-
     /**
      *  Consumer.
      *  Aqui iremos utilizar a api consume da amqplib, nesse momento estamos dizendo
@@ -61,6 +60,17 @@ amqp.connect('amqp://localhost', function (error0, connection) {
      *  o nome da nossa fila e uma função que será executada no momento que o nosso
      *  consumer estiver pronto para executa-la
      */
-    channel.consume(queue, consumeFunction)
+    channel.assertQueue(
+      '',
+      {
+        exclusive: true
+      },
+      (err, ok) => {
+        console.log('[X] Waiting for messages.')
+
+        channel.bindQueue(ok.queue, exchange, 'info')
+        channel.consume(ok.queue, consumeFunction)
+      }
+    )
   })
 })

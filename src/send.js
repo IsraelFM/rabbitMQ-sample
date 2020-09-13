@@ -24,7 +24,6 @@ function connectToRabbit () {
     if (error0) {
       throw error0
     }
-
     /**
      *  Caso a conexão seja bem sucedida vamos iniciar nosso canal de comunicação
      *  entre nossa aplicação e o servidor do rabbitMQ
@@ -34,37 +33,37 @@ function connectToRabbit () {
         throw error1
       }
 
-      // Declarando que o nome da nossa fila é 'hello'
-      const queue = 'hello'
+      // Declarando o nome da nossa exchange
+
+      const exchange = 'direct_logs'
 
       /**
-       *  Declarando qual será nossa mensagem a ser enviada para nossa fila
+       *  Declarando qual será nossa mensagem a ser enviada para nossa exchange
        *  neste caso um buffer do nosso objeto NUMBERS que contem os 2 numeros
        *  digitado pelo usuário
        */
-
       const message = Buffer.from(JSON.stringify(NUMBERS).toString())
 
       /**
-       *  após darmos o start na nossa comunicação, vamos estabalecer nossa fila,
-       *  utilizando a api da amqplib assertQueue
+       *  após darmos o start na nossa comunicação, vamos estabalecer nossa exchange,
+       *  utilizando a api da amqplib assertExchange
        */
-      channel.assertQueue(queue, { durable: false })
+      channel.assertExchange(exchange, 'direct', { durable: false })
 
       /**
        *  Publisher.
-       *  neste momento iremos enviar efetivamente nossa mensagem para a fila, 
-       *  através da api sendToQueue, ela recebe dois parâmetros, o nome da fila
-       *  no nosso caso 'hello' e a nossa mensagem previamente declarada como 
+       *  neste momento iremos enviar efetivamente nossa mensagem para a exchange,
+       *  através da api publish, ela recebe 3 parâmetros, o nome da exchange
+       *  um 'pattern' para identificar a mensagem e nossa mensagem previamente declarada como
        *  um buffer
        */
-      channel.sendToQueue(queue, message)
+      channel.publish(exchange, 'info', message)
 
       // Serve apenas para nos mostrar o buffer que foi enviado.
       console.log('[X] Sent ', message)
     })
     /**
-     *  Esta função serve apenas para que nossa aplicação espere alguns momentos 
+     *  Esta função serve apenas para que nossa aplicação espere alguns momentos
      *  antes de encerrar nossa conexão atraves do connection.close()
      *  e o encerramento do nosso processo utilizando o proccess.exit(0)
      */
@@ -81,6 +80,5 @@ async function handle () {
   // Chamada da nossa abstração da conexão com o rabbitMQ
   connectToRabbit()
 }
-
 // Utilizado para chamar nossas funções em conjunto.
 handle()
